@@ -1,6 +1,6 @@
-# rag-zhipu
+# Ragust
 
-RAG Zhipu adalah aplikasi Rust CLI untuk melakukan tanya-jawab atas dokumen dengan pendekatan Retrieval-Augmented Generation (RAG). Proyek ini dirancang untuk bekerja secara lokal dan ringan, sehingga cocok untuk mesin dengan sumber daya terbatas.
+Ragust adalah aplikasi Rust CLI untuk melakukan tanya-jawab atas dokumen dengan pendekatan Retrieval-Augmented Generation (RAG). Proyek ini dirancang untuk bekerja secara lokal dan ringan, sehingga cocok untuk mesin dengan sumber daya terbatas.
 
 ## Fitur Utama
 
@@ -25,7 +25,7 @@ Alur kerja proyek ini adalah:
 ## Struktur Proyek
 
 ```text
-rag-zhipu/
+Ragust/
 ├── Cargo.toml
 ├── README.md
 └── src/
@@ -49,8 +49,8 @@ Pastikan Anda telah menginstal:
 Clone repository ini lalu build proyek:
 
 ```bash
-git clone https://github.com/your-username/rag-zhipu.git
-cd rag-zhipu
+git clone https://github.com/faridhafizh/Ragust.git
+cd Ragust
 cargo build --release
 ```
 
