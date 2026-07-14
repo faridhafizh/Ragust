@@ -1,17 +1,12 @@
 use serde::{Deserialize, Serialize};
 
-/// Satu potongan dokumen beserta embedding dan metadata sumber.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct DocChunk {
     pub text: String,
     pub embedding: Vec<f32>,
-    /// File sumber chunk ini (mis: "document.pdf").
     pub source_file: String,
-    /// Hash konten sumber saat chunk ini dibuat.
     pub source_hash: String,
-    /// Nomor halaman (jika tersedia).
     pub page_number: Option<usize>,
-    /// Index chunk global dalam dokumen.
     pub chunk_index: usize,
 }
 
@@ -20,12 +15,12 @@ pub struct VectorStore {
     pub chunks: Vec<DocChunk>,
 }
 
+#[allow(dead_code)]
 impl VectorStore {
     pub fn new() -> Self {
         Self { chunks: Vec::new() }
     }
 
-    /// Tambahkan chunk dengan metadata lengkap.
     pub fn add(
         &mut self,
         text: String,
@@ -57,49 +52,19 @@ impl VectorStore {
         Ok(store)
     }
 
-    /// Cari top-k chunk paling relevan berdasarkan cosine similarity.
     pub fn search(&self, query_embedding: &[f32], top_k: usize) -> Vec<(&DocChunk, f32)> {
         if top_k == 0 || self.chunks.is_empty() {
             return Vec::new();
         }
 
-        let mut best: Vec<(&DocChunk, f32)> = Vec::with_capacity(top_k.min(self.chunks.len()));
+        let mut scored_chunks: Vec<(&DocChunk, f32)> = self.chunks.iter()
+            .map(|chunk| (chunk, cosine_similarity(&chunk.embedding, query_embedding)))
+            .collect();
 
-        for chunk in &self.chunks {
-            let score = cosine_similarity(&chunk.embedding, query_embedding);
-            if best.len() < top_k {
-                best.push((chunk, score));
-                best.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
-            } else if let Some(last) = best.last() {
-                if score > last.1 {
-                    best.pop();
-                    best.push((chunk, score));
-                    best.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
-                }
-            }
-        }
-
-        best
-    }
-
-    /// Hapus semua chunk dari file sumber tertentu.
-    pub fn remove_by_source_file(&mut self, source_file: &str) {
-        self.chunks.retain(|c| c.source_file != source_file);
-    }
-
-    /// Cek apakah cache sudah berisi chunk untuk file+hash ini.
-    pub fn has_cached_source(&self, source_file: &str, source_hash: &str) -> bool {
-        self.chunks
-            .iter()
-            .any(|c| c.source_file == source_file && c.source_hash == source_hash)
-    }
-
-    /// Hitung jumlah chunk untuk file sumber tertentu.
-    pub fn count_by_source(&self, source_file: &str) -> usize {
-        self.chunks
-            .iter()
-            .filter(|c| c.source_file == source_file)
-            .count()
+        // Urutkan dari skor tertinggi ke terendah
+        scored_chunks.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+        
+        scored_chunks.into_iter().take(top_k).collect()
     }
 }
 
@@ -107,14 +72,12 @@ fn cosine_similarity(a: &[f32], b: &[f32]) -> f32 {
     if a.len() != b.len() || a.is_empty() {
         return 0.0;
     }
-
     let dot: f32 = a.iter().zip(b.iter()).map(|(x, y)| x * y).sum();
     let norm_a: f32 = a.iter().map(|x| x * x).sum::<f32>().sqrt();
     let norm_b: f32 = b.iter().map(|x| x * x).sum::<f32>().sqrt();
-
+    
     if norm_a == 0.0 || norm_b == 0.0 {
         return 0.0;
     }
-
     dot / (norm_a * norm_b)
 }

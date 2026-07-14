@@ -1,25 +1,17 @@
 [package]
-name = "rag-zhipu"
+name = "rag-local"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-tokio     = { version = "1", features = ["full"] }
-reqwest   = { version = "0.11", default-features = false, features = ["json", "rustls-tls"] }
-serde     = { version = "1", features = ["derive"] }
-serde_json = "1"
-anyhow    = "1"
-dotenvy   = "0.15"
-clap      = { version = "=4.4.18", features = ["derive"] }
-sha2      = "0.10"
-zip       = "2"
-
-# Pin-pin untuk kompatibilitas
-time        = "=0.3.36"
-clap_builder = "=4.4.18"
-idna        = "=0.5.0"
-url         = "=2.5.0"
-hashbrown   = "=0.14.5"
-indexmap    = "=2.2.6"
-rangemap    = "=1.5.1"
-pdf-extract = "0.12.0"
+anyhow = "1.0"
+clap = { version = "4.5", features = ["derive"] }
+tokio = { version = "1.38", features = ["full"] }
+reqwest = { version = "0.12", features = ["stream", "rustls-tls"] }
+zip = "2.1"
+pdf-extract = "0.7"
+sha2 = "0.10"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+roxmltree = "0.20"  # Untuk parsing DOCX yang nyata
+scraper = "0.20"    # Untuk parsing HTML yang nyata
